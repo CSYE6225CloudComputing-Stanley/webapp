@@ -18,8 +18,24 @@ public class HttpExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler(HttpPayloadNotSupportedException.class)
-    public ResponseEntity<Void> handlePayloadNotAllowed(HttpPayloadNotSupportedException ex) {
+    @ExceptionHandler(HttpRequestPayloadNotAllowedException.class)
+    public ResponseEntity<Void> handlePayloadNotAllowed(HttpRequestPayloadNotAllowedException ex) {
+        return ResponseEntity
+                .badRequest()
+                .header("Cache-Control", "no-cache")
+                .build();
+    }
+
+    @ExceptionHandler(HttpRequestPathVariableNotAllowed.class)
+    public ResponseEntity<Void> handlePayloadNotAllowed(HttpRequestPathVariableNotAllowed ex) {
+        return ResponseEntity
+                .badRequest()
+                .header("Cache-Control", "no-cache")
+                .build();
+    }
+
+    @ExceptionHandler(HttpRequestParameterNotAllowed.class)
+    public ResponseEntity<Void> handlePayloadNotAllowed(HttpRequestParameterNotAllowed ex) {
         return ResponseEntity
                 .badRequest()
                 .header("Cache-Control", "no-cache")

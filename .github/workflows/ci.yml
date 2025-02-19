@@ -1,0 +1,56 @@
+name: CI for Fork PR on Upstream
+
+on:
+  pull_request_target:
+    branches:
+      - main
+
+jobs:
+  webapp-ci:
+    runs-on: ubuntu-24.04
+
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: ${{ secrets.DB_NAME }}
+          MYSQL_USER: ${{ secrets.DB_USERNAME }}
+          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u ${{ secrets.DB_USERNAME }} --password=${{ secrets.DB_PASSWORD }}"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout Fork PR Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+      - name: Install OpenJDK 21 and Maven
+        run: |
+          sudo apt update
+          sudo apt install openjdk-21-jdk -y
+          sudo apt install maven -y
+
+      - name: Verify Java and Maven Versions
+        run: |
+          java -version
+          mvn -version
+
+      - name: Verify MySQL Service
+        run: |
+          sudo apt-get install -y mysql-client
+          mysql -h 127.0.0.1 -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} -D ${{ secrets.DB_NAME }} -e "SHOW DATABASES;"
+
+      - name: Build & Run Tests
+        env:
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: mvn clean test

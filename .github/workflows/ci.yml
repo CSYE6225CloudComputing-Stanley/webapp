@@ -38,7 +38,7 @@ jobs:
           echo "DB_HOST=$DB_HOST"
           echo "DB_PORT=$DB_PORT"
           echo "DB_NAME=$DB_NAME"
-          echo "DB_USERNAME=DB_USERNAME"
+          echo "DB_USERNAME=$DB_USERNAME"
           echo "DB_PASSWORD=$DB_PASSWORD"
 
       - name: Set Up Java 21
@@ -73,7 +73,7 @@ jobs:
           echo "DB_HOST=$DB_HOST"
           echo "DB_PORT=$DB_PORT"
           echo "DB_NAME=$DB_NAME"
-          echo "DB_USERNAME=DB_USERNAME"
+          echo "DB_USERNAME=$DB_USERNAME"
           echo "DB_PASSWORD=$DB_PASSWORD"
 
       - name: Start Spring Boot Application

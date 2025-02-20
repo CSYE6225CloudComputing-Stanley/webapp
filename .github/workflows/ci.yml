@@ -14,16 +14,21 @@ jobs:
         image: mysql:8
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: ${{ secrets.DB_NAME }}
-          MYSQL_USER: ${{ secrets.DB_USERNAME }}
-          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          MYSQL_DATABASE: testdb
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testpass
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -u ${{ secrets.DB_USERNAME }} --password=${{ secrets.DB_PASSWORD }}"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u testuser --password=testpass"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
+
+    env:
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
     steps:
       - name: Checkout Fork PR Code
@@ -32,25 +37,31 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
 
-      - name: Install OpenJDK 21 and Maven
+      - name: Install Dependencies (JDK, Maven, MySQL Client)
         run: |
           sudo apt update
           sudo apt install openjdk-21-jdk -y
           sudo apt install maven -y
+          sudo apt-get install -y mysql-client
 
       - name: Verify Java and Maven Versions
         run: |
           java -version
           mvn -version
 
-      - name: Verify MySQL Service
+      - name: Update MySQL Credentials to Use GitHub Secrets
         run: |
-          sudo apt-get install -y mysql-client
+          mysql -h 127.0.0.1 -u root -proot -e "
+            ALTER USER 'testuser'@'%' IDENTIFIED BY '${{ secrets.DB_PASSWORD }}';
+            RENAME DATABASE testdb TO ${{ secrets.DB_NAME }};
+            CREATE USER '${{ secrets.DB_USERNAME }}'@'%' IDENTIFIED BY '${{ secrets.DB_PASSWORD }}';
+            GRANT ALL PRIVILEGES ON ${{ secrets.DB_NAME }}.* TO '${{ secrets.DB_USERNAME }}'@'%';
+            FLUSH PRIVILEGES;"
+
+      - name: Verify MySQL Service with Updated Credentials
+        run: |
           mysql -h 127.0.0.1 -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} -D ${{ secrets.DB_NAME }} -e "SHOW DATABASES;"
 
-      - name: Build & Run Tests
-        env:
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: mvn clean test
+      - name: Run Maven Build with GitHub Secrets
+        run: |
+          sudo DB_NAME=${{ secrets.DB_NAME }} DB_USERNAME=${{ secrets.DB_USERNAME }} DB_PASSWORD=${{ secrets.DB_PASSWORD }} mvn clean install

@@ -1,10 +1,7 @@
-name: Webapp test
+name: Webapp CI
 
 on:
   pull_request:
-    branches:
-      - main
-  push:
     branches:
       - main
 
@@ -13,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DB_HOST: 127.0.0.1
+      DB_HOST: mysql
       DB_PORT: 3306
       DB_NAME: ${{ secrets.DB_NAME }}
       DB_USERNAME: ${{ secrets.DB_USERNAME }}
@@ -25,9 +22,11 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
           MYSQL_DATABASE: ${{ secrets.DB_NAME }}
+          MYSQL_USER: ${{ secrets.DB_USERNAME }}
+          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping -h 127.0.0.1 --silent" --health-interval=10s --health-timeout=5s --health-retries=5
+        options: --health-cmd="mysqladmin ping -h localhost --silent" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
       - name: Checkout Repository
@@ -47,37 +46,14 @@ jobs:
           restore-keys: |
             maven-${{ runner.os }}-
 
-      - name: Wait for MySQL to be Ready
+      - name: Wait for MySQL to Accept Connections
         run: |
-          echo "Waiting for MySQL to start..."
+          echo "Waiting for MySQL to accept connections..."
           for i in {1..30}; do
-            if mysqladmin ping -h $DB_HOST --silent; then
-              echo "MySQL is up!"
-              break
-            fi
-            echo "MySQL is unavailable - sleeping"
+            mysql -h "$DB_HOST" -u "$DB_USERNAME" -p"$DB_PASSWORD" -e "SELECT 1;" && break
+            echo "MySQL is not ready yet - retrying..."
             sleep 2
           done
 
-      - name: Print Environment Variables
-        run: |
-          echo "Environment Variables:"
-          echo "DB_HOST=$DB_HOST"
-          echo "DB_PORT=$DB_PORT"
-          echo "DB_NAME=$DB_NAME"
-          echo "DB_USERNAME=DB_USERNAME"
-          echo "DB_PASSWORD=$DB_PASSWORD"
-
-      - name: Start Spring Boot Application
-        run: |
-          echo "Starting Spring Boot application..."
-          mvn spring-boot:run &
-          sleep 10
-
       - name: Run Tests
         run: mvn clean test
-
-      - name: Stop Spring Boot Application
-        run: |
-          echo "Stopping Spring Boot application..."
-          pkill -f 'java.*spring-boot' || true

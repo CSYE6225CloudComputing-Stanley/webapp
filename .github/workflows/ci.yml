@@ -31,11 +31,18 @@ jobs:
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
     steps:
-      - name: Checkout Fork PR Code
+      - name: Checkout Upstream Repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: main
+          repository: ${{ github.repository }}
+          fetch-depth: 0
+
+      - name: Fetch and Checkout Fork PR Code
+        run: |
+          git remote add fork https://github.com/${{ github.event.pull_request.head.repo.full_name }}.git
+          git fetch fork ${{ github.event.pull_request.head.ref }}
+          git checkout -b pr-${{ github.event.pull_request.number }} fork/${{ github.event.pull_request.head.ref }}
 
       - name: Install Dependencies (JDK, Maven, MySQL Client)
         run: |
@@ -52,8 +59,7 @@ jobs:
       - name: Update MySQL Credentials to Use GitHub Secrets
         run: |
           mysql -h 127.0.0.1 -u root -proot -e "
-            ALTER USER 'testuser'@'%' IDENTIFIED BY '${{ secrets.DB_PASSWORD }}';
-            RENAME DATABASE testdb TO ${{ secrets.DB_NAME }};
+            CREATE DATABASE IF NOT EXISTS ${{ secrets.DB_NAME }};
             CREATE USER '${{ secrets.DB_USERNAME }}'@'%' IDENTIFIED BY '${{ secrets.DB_PASSWORD }}';
             GRANT ALL PRIVILEGES ON ${{ secrets.DB_NAME }}.* TO '${{ secrets.DB_USERNAME }}'@'%';
             FLUSH PRIVILEGES;"

@@ -19,19 +19,27 @@ jobs:
       DB_USERNAME: ${{ secrets.DB_USERNAME }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          MYSQL_DATABASE: ${{ secrets.DB_NAME }}
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping -h 127.0.0.1 --silent" --health-interval=10s --health-timeout=5s --health-retries=5
+    #    services:
+    #      mysql:
+    #        image: mysql:8.0
+    #        env:
+    #          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
+    #          MYSQL_DATABASE: ${{ secrets.DB_NAME }}
+    #        ports:
+    #          - 3306:3306
+    #        options: --health-cmd="mysqladmin ping -h 127.0.0.1 --silent" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+      - name: Print Environment Variables
+        run: |
+          echo "Environment Variables:"
+          echo "DB_HOST=$DB_HOST"
+          echo "DB_PORT=$DB_PORT"
+          echo "DB_NAME=$DB_NAME"
+          echo "DB_USERNAME=$DB_USERNAME"
+          echo "DB_PASSWORD=$DB_PASSWORD"
 
       - name: Set Up Java 21
         uses: actions/setup-java@v3
@@ -65,7 +73,7 @@ jobs:
           echo "DB_HOST=$DB_HOST"
           echo "DB_PORT=$DB_PORT"
           echo "DB_NAME=$DB_NAME"
-          echo "DB_USERNAME=DB_USERNAME"
+          echo "DB_USERNAME=$DB_USERNAME"
           echo "DB_PASSWORD=$DB_PASSWORD"
 
       - name: Start Spring Boot Application

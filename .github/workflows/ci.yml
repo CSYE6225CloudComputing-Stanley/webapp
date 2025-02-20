@@ -1,73 +1,83 @@
-name: CI for Fork PR on Upstream
+name: Webapp test
 
 on:
-  pull_request_target:
+  pull_request:
+    branches:
+      - main
+  push:
     branches:
       - main
 
 jobs:
   webapp-ci:
-    runs-on: ubuntu-24.04
-
-    services:
-      mysql:
-        image: mysql:8
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: testdb
-          MYSQL_USER: testuser
-          MYSQL_PASSWORD: testpass
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -u testuser --password=testpass"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+    runs-on: ubuntu-latest
 
     env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
       DB_NAME: ${{ secrets.DB_NAME }}
       DB_USERNAME: ${{ secrets.DB_USERNAME }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.DB_NAME }}
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping -h 127.0.0.1 --silent" --health-interval=10s --health-timeout=5s --health-retries=5
+
     steps:
-      - name: Checkout Upstream Repository
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Java 21
+        uses: actions/setup-java@v3
         with:
-          ref: main
-          repository: ${{ github.repository }}
-          fetch-depth: 0
+          distribution: 'temurin'
+          java-version: '21'
 
-      - name: Fetch and Checkout Fork PR Code
-        run: |
-          git remote add fork https://github.com/${{ github.event.pull_request.head.repo.full_name }}.git
-          git fetch fork ${{ github.event.pull_request.head.ref }}
-          git checkout -b pr-${{ github.event.pull_request.number }} fork/${{ github.event.pull_request.head.ref }}
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            maven-${{ runner.os }}-
 
-      - name: Install Dependencies (JDK, Maven, MySQL Client)
+      - name: Wait for MySQL to be Ready
         run: |
-          sudo apt update
-          sudo apt install openjdk-21-jdk -y
-          sudo apt install maven -y
-          sudo apt-get install -y mysql-client
+          echo "Waiting for MySQL to start..."
+          for i in {1..30}; do
+            if mysqladmin ping -h $DB_HOST --silent; then
+              echo "MySQL is up!"
+              break
+            fi
+            echo "MySQL is unavailable - sleeping"
+            sleep 2
+          done
 
-      - name: Verify Java and Maven Versions
+      - name: Print Environment Variables
         run: |
-          java -version
-          mvn -version
+          echo "Environment Variables:"
+          echo "DB_HOST=$DB_HOST"
+          echo "DB_PORT=$DB_PORT"
+          echo "DB_NAME=$DB_NAME"
+          echo "DB_USERNAME=DB_USERNAME"
+          echo "DB_PASSWORD=$DB_PASSWORD"
 
-      - name: Update MySQL Credentials to Use GitHub Secrets
+      - name: Start Spring Boot Application
         run: |
-          mysql -h 127.0.0.1 -u root -proot -e "
-            CREATE DATABASE IF NOT EXISTS ${{ secrets.DB_NAME }};
-            CREATE USER '${{ secrets.DB_USERNAME }}'@'%' IDENTIFIED BY '${{ secrets.DB_PASSWORD }}';
-            GRANT ALL PRIVILEGES ON ${{ secrets.DB_NAME }}.* TO '${{ secrets.DB_USERNAME }}'@'%';
-            FLUSH PRIVILEGES;"
+          echo "Starting Spring Boot application..."
+          mvn spring-boot:run &
+          sleep 10
 
-      - name: Verify MySQL Service with Updated Credentials
-        run: |
-          mysql -h 127.0.0.1 -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} -D ${{ secrets.DB_NAME }} -e "SHOW DATABASES;"
+      - name: Run Tests
+        run: mvn clean test
 
-      - name: Run Maven Build with GitHub Secrets
+      - name: Stop Spring Boot Application
         run: |
-          sudo DB_NAME=${{ secrets.DB_NAME }} DB_USERNAME=${{ secrets.DB_USERNAME }} DB_PASSWORD=${{ secrets.DB_PASSWORD }} mvn clean install
+          echo "Stopping Spring Boot application..."
+          pkill -f 'java.*spring-boot' || true

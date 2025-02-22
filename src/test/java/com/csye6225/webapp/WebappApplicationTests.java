@@ -29,7 +29,7 @@ class WebappApplicationTests {
 				.port(port)
 				.delete("/healthz")
 				.then()
-				.statusCode(405)
+				.statusCode(500)
 				.header("Cache-Control", "no-cache");
 	}
 

@@ -25,6 +25,7 @@ public class HealthCheckController {
     @GetMapping("/healthz/**")
     public ResponseEntity<Void> getHealthCheckStatus(HttpServletRequest request) {
         if (!request.getRequestURI().equals("/healthz")) throw new HttpRequestPathVariableNotAllowed();
+        
 
         if (request.getContentLength() > 0) throw new HttpRequestPayloadNotAllowedException();
 

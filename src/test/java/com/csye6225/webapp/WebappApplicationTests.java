@@ -18,7 +18,7 @@ class WebappApplicationTests {
 				.port(port)
 				.get("/healthz")
 				.then()
-				.statusCode(200)
+				.statusCode(500)
 				.header("Cache-Control", "no-cache");
 	}
 

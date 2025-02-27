@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  packer_fmt_validate:
+  packer-fmt-validate:
     runs-on: ubuntu-latest
 
     steps:

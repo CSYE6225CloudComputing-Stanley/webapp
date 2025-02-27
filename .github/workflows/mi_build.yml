@@ -33,7 +33,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Install Packer
-        uses: hashicorp/setup-packer@v1
+        uses: hashicorp/setup-packer@main
         with:
           version: 'latest'
 

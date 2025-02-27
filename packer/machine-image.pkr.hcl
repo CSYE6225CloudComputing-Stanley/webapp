@@ -32,6 +32,7 @@ build {
   provisioner "file" {
     source      = "${path.root}/artifacts/webapp.jar"
     destination = "/tmp/webapp.jar"
+    generated   = true
   }
 
   provisioner "file" {

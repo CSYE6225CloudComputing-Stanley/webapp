@@ -1,43 +1,53 @@
-# name: Packer Machine Image Build
+name: Packer Machine Image Build
 
-# on:
-#   workflow_run:
-#     workflows: ["Webapp CI"]
-#     types:
-#       - completed
+on:
+  workflow_run:
+    workflows: ["Webapp CI"]
+    types: [completed]
 
-# jobs:
-#   build-mi:
-#     runs-on: ubuntu-latest
+jobs:
+  build-mi:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - name: Checkout Repository
-#         uses: actions/checkout@v3
+    env:
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
-#       - name: Download Artifact
-#         uses: actions/download-artifact@v3
-#         with:
-#           name: webapp
-#           path: packer/artifacts
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-#       - name: Setup AWS CLI
-#         uses: aws-actions/configure-aws-credentials@v2
-#         with:
-#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: us-east-1
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: webapp
+          path: packer/artifacts
 
-#       - name: Install Packer
-#         uses: hashicorp/setup-packer@main
-#         with:
-#           version: 'latest'
-      
-#       - name: Initialize Packer
-#         run: |
-#           cd packer
-#           packer init .
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-#       - name: Build Machine Image
-#         run: |
-#           cd packer
-#           packer build -var-file=dev.pkrvars.hcl
+      - name: Install Packer
+        uses: hashicorp/setup-packer@v1
+        with:
+          version: 'latest'
+
+      - name: Initialize Packer
+        run: |
+          cd packer
+          packer init .
+
+      - name: Build Machine Image
+        run: |
+          cd packer
+          packer build \
+            -var-file=-var-file=dev.pkrvars.hcl \
+            -var "DB_NAME=${DB_NAME}" \
+            -var "DB_USERNAME=${DB_USERNAME}" \
+            -var "DB_PASSWORD=${DB_PASSWORD}" \
+            .

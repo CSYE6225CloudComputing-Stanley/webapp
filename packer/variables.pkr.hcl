@@ -42,3 +42,18 @@ variable "ssh_username" {
   type    = string
   default = "ubuntu"
 }
+
+variable "DB_NAME" {
+  type    = string
+  default = "dummy_name"
+}
+
+variable "DB_USERNAME" {
+  type    = string
+  default = "dummy_username"
+}
+
+variable "DB_PASSWORD" {
+  type    = string
+  default = "dummy_password"
+}

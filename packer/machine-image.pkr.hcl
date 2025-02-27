@@ -64,9 +64,9 @@ build {
     environment_vars = [
       "Owner=csye6225",
       "Group=csye6225",
-      "DB_NAME=webapp",
-      "DB_USERNAME=csye6225user",
-      "DB_PASSWORD=csye6225user",
+      "DB_NAME=${var.DB_NAME}",
+      "DB_USERNAME=${var.DB_USERNAME}",
+      "DB_PASSWORD=${var.DB_PASSWORD}",
     ]
     inline = [
       "set -e",

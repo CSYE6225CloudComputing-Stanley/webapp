@@ -23,6 +23,7 @@ source "amazon-ebs" "ubuntu" {
   }
 
   ssh_username = var.ssh_username
+  ami_users    = [var.demo_account_id]
   ami_groups   = []
 }
 

@@ -57,3 +57,8 @@ variable "DB_PASSWORD" {
   type    = string
   default = "dummy_password"
 }
+
+variable "demo_account_id" {
+  type    = string
+  default = "038462758666"
+}

@@ -30,14 +30,51 @@ build {
   sources = ["source.amazon-ebs.ubuntu"]
 
   provisioner "file" {
+    source      = "${path.root}/artifacts/webapp.jar"
+    destination = "/tmp/webapp.jar"
+  }
+
+  provisioner "file" {
     source      = "${path.root}/../scripts/setup-system.sh"
     destination = "/tmp/setup-system.sh"
   }
 
+  provisioner "file" {
+    source      = "${path.root}/../scripts/dependency.sh"
+    destination = "/tmp/dependency.sh"
+  }
+
+  provisioner "file" {
+    source      = "${path.root}/../scripts/db_config.sh"
+    destination = "/tmp/db_config.sh"
+  }
+
+  provisioner "file" {
+    source      = "${path.root}/../scripts/app_config.sh"
+    destination = "/tmp/app_config.sh"
+  }
+
+  provisioner "file" {
+    source      = "${path.root}/../scripts/runner.sh"
+    destination = "/tmp/runner.sh"
+  }
+
   provisioner "shell" {
+    environment_vars = [
+      "Owner=csye6225",
+      "Group=csye6225",
+      "DB_NAME=webapp",
+      "DB_USERNAME=csye6225user",
+      "DB_PASSWORD=csye6225user",
+    ]
     inline = [
-      "chmod +x /tmp/setup-system.sh",
-      "sudo /tmp/setup-system.sh"
+      "set -e",
+      "chmod +x /tmp/*.sh",
+      "sudo -E /tmp/setup-system.sh",
+      "sudo /tmp/dependency.sh",
+      "sudo -E /tmp/db_config.sh",
+      "sudo -E /tmp/app_config.sh",
+      "sudo -E /tmp/runner.sh"
     ]
   }
 }

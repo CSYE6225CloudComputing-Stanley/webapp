@@ -1,4 +1,4 @@
-name: Packer Custom Image CI
+name: Packer format and validate CI
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  packer_ci:
+  packer_fmt_validate:
     runs-on: ubuntu-latest
 
     steps:

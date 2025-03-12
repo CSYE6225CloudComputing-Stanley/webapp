@@ -11,7 +11,7 @@ packer {
   }
 }
 
-source "amazon-ebs" "ubuntu" {
+        source "amazon-ebs" "ubuntu" {
   ami_name      = var.ami_name
   instance_type = var.aws_instance_type
   region        = var.aws_region

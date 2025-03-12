@@ -62,3 +62,64 @@ variable "demo_account_id" {
   type    = string
   default = "038462758666"
 }
+
+variable "gcp_project_id" {
+  type        = string
+  description = "GCP Project ID"
+  default     = "cellular-line-452210-e4"
+}
+
+
+variable "gcp_source_image" {
+  type        = string
+  description = "Source image"
+  default     = "ubuntu-2404-noble-amd64-v20250228"
+}
+
+variable "gcp_source_image_project_id" {
+  type    = list(string)
+  default = ["ubuntu-os-cloud"]
+}
+
+variable "gcp_service_account_email" {
+  type        = string
+  description = "service account email"
+  default     = "packer-runner@cellular-line-452210-e4.iam.gserviceaccount.com"
+}
+
+variable "gcp_machine_type" {
+  type        = string
+  description = "GCP Machine Type"
+  default     = "e2-medium"
+}
+
+variable "gcp_zone" {
+  type        = string
+  description = "GCP Zone"
+  default     = "us-central1-a"
+}
+
+variable "gcp_image_name" {
+  type        = string
+  description = "Name of the GCP custom image"
+  default     = "my-gcp-image"
+}
+
+variable "gcp_ssh_username" {
+  type        = string
+  description = "ssh username"
+  default     = "ubuntu"
+}
+
+
+variable "gcp_dev_project_id" {
+  type        = string
+  description = "dev project id"
+  default     = "cellular-line-452210-e4"
+}
+
+variable "gcp_demo_service_account" {
+  type        = string
+  description = "service account email"
+  default     = "instance-launcher@gcp-demo-453420.iam.gserviceaccount.com"
+}

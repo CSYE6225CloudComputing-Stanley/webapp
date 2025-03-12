@@ -28,7 +28,7 @@ source "amazon-ebs" "ubuntu" {
 }
 
 build {
-  sources = ["source.amazon-ebs.ubuntu"]
+      sources = ["source.amazon-ebs.ubuntu"]
 
   provisioner "file" {
     source      = "${path.root}/artifacts/webapp.jar"

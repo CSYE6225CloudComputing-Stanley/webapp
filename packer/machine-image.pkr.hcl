@@ -4,6 +4,10 @@ packer {
       version = ">= 1.2.8"
       source  = "github.com/hashicorp/amazon"
     }
+    googlecompute = {
+      version = ">= 0.1.0"
+      source  = "github.com/hashicorp/googlecompute"
+    }
   }
 }
 
@@ -27,8 +31,20 @@ source "amazon-ebs" "ubuntu" {
   ami_groups   = []
 }
 
+source "googlecompute" "ubuntu" {
+  project_id              = var.gcp_project_id
+  source_image            = var.gcp_source_image
+  source_image_project_id = var.gcp_source_image_project_id
+  service_account_email   = var.gcp_service_account_email
+  machine_type            = var.gcp_machine_type
+  zone                    = var.gcp_zone
+  image_name              = var.gcp_image_name
+  ssh_username            = var.gcp_ssh_username
+}
+
 build {
-      sources = ["source.amazon-ebs.ubuntu"]
+
+  sources = ["source.amazon-ebs.ubuntu", "source.googlecompute.ubuntu"]
 
   provisioner "file" {
     source      = "${path.root}/artifacts/webapp.jar"
@@ -77,6 +93,13 @@ build {
       "sudo -E /tmp/db_config.sh",
       "sudo -E /tmp/app_config.sh",
       "sudo -E /tmp/runner.sh"
+    ]
+  }
+
+  post-processor "shell-local" {
+    inline = [
+      "echo 'Granting GCP demo permission to use this image...'",
+      "gcloud compute images add-iam-policy-binding ${var.gcp_image_name} --project=${var.gcp_dev_project_id} --member=serviceAccount:${var.gcp_demo_service_account} --role=roles/compute.imageUser"
     ]
   }
 }

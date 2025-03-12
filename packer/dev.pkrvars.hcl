@@ -1,3 +1,4 @@
+# aws var
 aws_region              = "us-east-1"
 aws_profile             = "packer-dev"
 ami_name                = "my_ubuntu_AMI"
@@ -8,3 +9,15 @@ ami_virtualization_type = "hvm"
 ami_filter_owners       = "099720109477"
 ssh_username            = "ubuntu"
 demo_account_id         = "038462758666"
+
+#GCP var
+gcp_project_id              = "cellular-line-452210-e4"
+gcp_source_image            = "ubuntu-2404-noble-amd64-v20250228"
+gcp_source_image_project_id = ["ubuntu-os-cloud"]
+gcp_service_account_email   = "packer-runner@cellular-line-452210-e4.iam.gserviceaccount.com"
+gcp_machine_type            = "e2-medium"
+gcp_zone                    = "us-east1-b"
+gcp_image_name              = "my-gcp-image"
+gcp_ssh_username            = "ubuntu"
+gcp_dev_project_id          = "cellular-line-452210-e4"
+gcp_demo_service_account    = "instance-launcher@gcp-demo-453420.iam.gserviceaccount.com"

@@ -12,7 +12,7 @@ packer {
 }
 
 source "amazon-ebs" "ubuntu" {
-  ami_name      = varr.ami_name
+  ami_name      = var.ami_name
   instance_type = var.aws_instance_type
   region        = var.aws_region
   profile       = var.aws_profile

@@ -13,7 +13,7 @@ demo_account_id         = "038462758666"
 #GCP var
 gcp_project_id              = "cellular-line-452210-e4"
 gcp_source_image            = "ubuntu-2404-noble-amd64-v20250228"
-gcp_source_image_project_id = "ubuntu-os-cloud"
+gcp_source_image_project_id = ["ubuntu-os-cloud"]
 gcp_service_account_email   = "packer-runner@cellular-line-452210-e4.iam.gserviceaccount.com"
 gcp_machine_type            = "e2-medium"
 gcp_zone                    = "us-east1-b"

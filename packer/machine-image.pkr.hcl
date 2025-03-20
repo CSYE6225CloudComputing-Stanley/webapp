@@ -81,16 +81,16 @@ build {
     environment_vars = [
       "Owner=csye6225",
       "Group=csye6225",
-      "DB_NAME=${var.DB_NAME}",
-      "DB_USERNAME=${var.DB_USERNAME}",
-      "DB_PASSWORD=${var.DB_PASSWORD}",
+      # "DB_NAME=${var.DB_NAME}",
+      # "DB_USERNAME=${var.DB_USERNAME}",
+      # "DB_PASSWORD=${var.DB_PASSWORD}",
     ]
     inline = [
       "set -e",
       "chmod +x /tmp/*.sh",
       "sudo -E /tmp/setup-system.sh",
       "sudo /tmp/dependency.sh",
-      "sudo -E /tmp/db_config.sh",
+      # "sudo -E /tmp/db_config.sh",
       "sudo -E /tmp/app_config.sh",
       "sudo -E /tmp/runner.sh"
     ]

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-if ! command -v mysql; then
-    echo "Installing MySQL Server....."
-    sudo apt install mysql-server -y
-fi
+# if ! command -v mysql; then
+#     echo "Installing MySQL Server....."
+#     sudo apt install mysql-server -y
+# fi
 
 
 if ! command -v java; then

@@ -8,10 +8,10 @@ spring:
       ddl-auto: create-drop
 
 aws:
-  profile: dev
+#  profile: dev
   region: ${AWS_REGION:us-east-1}
   s3:
-    bucket: aaa
+    bucket: ${BUCKET_NAME}
 
 server:
   address: 0.0.0.0

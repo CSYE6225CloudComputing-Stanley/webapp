@@ -10,8 +10,6 @@ public interface S3Service {
 
     S3MetaData getFile(String id);
 
-    S3MetaData getFileByFineName(String name);
-
     void deleteFile(S3MetaData object);
 
 }

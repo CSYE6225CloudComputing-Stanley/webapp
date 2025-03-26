@@ -6,8 +6,11 @@ import com.csye6225.webapp.exception.HttpRequestParameterNotAllowed;
 import com.csye6225.webapp.exception.HttpRequestPathVariableNotAllowed;
 import com.csye6225.webapp.exception.HttpRequestPayloadNotAllowedException;
 import com.csye6225.webapp.service.HealthCheckService;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hibernate.exception.JDBCConnectionException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,8 +35,16 @@ public class HealthCheckControllerTest {
     @InjectMocks
     private HealthCheckController healthCheckController;
 
+    private MeterRegistry meterRegistry;
+
+    @BeforeEach
+    public void setup() {
+        meterRegistry = new SimpleMeterRegistry();
+        healthCheckController = new HealthCheckController(healthCheckService, meterRegistry);
+    }
+
     @Test
-    public void testSuccess() throws Exception {
+    public void testSuccess() {
         when(request.getRequestURI()).thenReturn("/healthz");
         when(request.getContentLength()).thenReturn(0);
         when(request.getQueryString()).thenReturn(null);

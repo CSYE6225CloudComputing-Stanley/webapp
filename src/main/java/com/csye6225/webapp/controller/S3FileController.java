@@ -4,7 +4,10 @@ package com.csye6225.webapp.controller;
 import com.csye6225.webapp.entity.S3MetaData;
 import com.csye6225.webapp.exception.*;
 import com.csye6225.webapp.service.s3.S3Service;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.time.Duration;
 
 
 @RequestMapping("/v1/file")
@@ -20,21 +24,32 @@ public class S3FileController {
 
     private final S3Service S3Service;
 
+    private final MeterRegistry meterRegistry;
+
+    private static final Logger log = LoggerFactory.getLogger(S3FileController.class);
+
     @Autowired
-    public S3FileController(S3Service S3Service) {
+    public S3FileController(S3Service S3Service, MeterRegistry meterRegistry) {
         this.S3Service = S3Service;
+        this.meterRegistry = meterRegistry;
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<S3MetaData> getFile(@PathVariable String id) {
-        S3MetaData f = S3Service.getFile(id);
-        if (f == null) {
-            return ResponseEntity
-                    .notFound()
-                    .header("Cache-Control", "no-cache")
-                    .build();
+        log.info("Received GET S3 /v1/file/{id}");
+        meterRegistry.counter("api.get.v1.file.id.count").increment();
+        long start = System.currentTimeMillis();
+
+        try {
+            S3MetaData f = S3Service.getFile(id);
+            if (f == null) {
+                throw new ObjectIsNullException();
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(f);
+        } finally {
+            long duration = System.currentTimeMillis() - start;
+            meterRegistry.timer("api.get.v1.file.id.timer").record(Duration.ofMillis(duration));
         }
-        return ResponseEntity.status(HttpStatus.OK).body(f);
     }
 
     @GetMapping()
@@ -44,34 +59,47 @@ public class S3FileController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path="/**")
     public ResponseEntity<S3MetaData> addFile(HttpServletRequest request, @RequestPart("profilePic") MultipartFile file) throws IOException {
-        if (!request.getRequestURI().equals("/v1/file")) throw new HttpRequestPostPathVariableNotAllowed();
+        log.info("Received S3 POST /v1/file");
+        meterRegistry.counter("api.post.v1.file.count").increment();
+        long start = System.currentTimeMillis();
 
-        if (file.isEmpty()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        try {
+            if (!request.getRequestURI().equals("/v1/file")) throw new HttpRequestPostPathVariableNotAllowed();
 
-        if (request.getQueryString() != null) throw new HttpRequestParameterNotAllowed();
+            if (file.isEmpty()) { throw new MediaFileIsEmptyException(); }
 
-        String filename = file.getOriginalFilename();
-        S3MetaData object = S3Service.getFileByFineName(filename);
-        if (object != null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            if (request.getQueryString() != null) throw new HttpRequestParameterNotAllowed();
 
-        S3MetaData f = S3Service.addFile(file);
-        return ResponseEntity.status(HttpStatus.OK).body(f);
+            S3MetaData f = S3Service.addFile(file);
+            return ResponseEntity.status(HttpStatus.OK).body(f);
+        } finally {
+            long duration = System.currentTimeMillis() - start;
+            meterRegistry.timer("api.post.v1.file.timer").record(Duration.ofMillis(duration));
+        }
+
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFile(@PathVariable String id) {
-        S3MetaData object = S3Service.getFile(id);
+        log.info("Received s3 DELETE /v1/file/{id}");
+        meterRegistry.counter("api.delete.v1.file.id.count").increment();
+        long start = System.currentTimeMillis();
 
-        if (object == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        try {
+            S3MetaData object = S3Service.getFile(id);
+
+            if (object == null) { throw new ObjectIsNullException(); }
+
+            S3Service.deleteFile(object);
+
+            return ResponseEntity
+                    .ok()
+                    .header("Cache-Control", "no-cache")
+                    .build();
+        } finally {
+            long duration = System.currentTimeMillis() - start;
+            meterRegistry.timer("api.delete.v1.file.id.timer").record(Duration.ofMillis(duration));
         }
-
-        S3Service.deleteFile(object);
-
-        return ResponseEntity
-                .ok()
-                .header("Cache-Control", "no-cache")
-                .build();
     }
 
     @DeleteMapping()

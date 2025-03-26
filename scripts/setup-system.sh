@@ -5,6 +5,10 @@ if ! command -v unzip; then
     sudo apt install -y unzip
 fi
 
+echo "Installing amazon cloudwatch-agent....."
+sudo wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+sudo dpkg -i amazon-cloudwatch-agent.deb
+
 echo "Updating packages....."
 sudo apt update
 

@@ -1,8 +1,13 @@
 package com.csye6225.webapp.dao;
 
+import com.csye6225.webapp.controller.HealthCheckController;
 import com.csye6225.webapp.entity.HealthCheck;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.persistence.EntityManager;
 import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +22,14 @@ class HealthCheckDAOImplTest {
 
     @Mock
     private EntityManager entityManager;
+
+    private MeterRegistry meterRegistry;
+
+    @BeforeEach
+    public void setup() {
+        meterRegistry = new SimpleMeterRegistry();
+        healthCheckDAO = new HealthCheckDAOImpl(entityManager, meterRegistry);
+    }
 
     @InjectMocks
     private HealthCheckDAOImpl healthCheckDAO;

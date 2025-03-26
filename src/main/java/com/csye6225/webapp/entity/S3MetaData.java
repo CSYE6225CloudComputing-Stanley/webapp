@@ -8,7 +8,7 @@ import java.time.Instant;
 public class S3MetaData {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+//    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", length = 36, nullable = false, updatable = false)
     private String id;
 
@@ -26,6 +26,7 @@ public class S3MetaData {
     public String getUrl() { return url; }
     public Instant getUploadDate() { return uploadDate; }
 
+    public void setId(String id) { this.id = id; }
     public void setFileName(String fileName) { this.fileName = fileName; }
     public void setUrl(String url) { this.url = url; }
     public void setUploadDate(Instant uploadDate) { this.uploadDate = uploadDate; }

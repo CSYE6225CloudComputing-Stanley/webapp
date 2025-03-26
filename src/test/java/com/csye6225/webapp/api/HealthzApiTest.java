@@ -3,11 +3,16 @@ package com.csye6225.webapp.api;
 import com.csye6225.webapp.controller.HealthCheckController;
 import com.csye6225.webapp.dao.HealthCheckDAO;
 import com.csye6225.webapp.service.HealthCheckService;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,6 +39,14 @@ public class HealthzApiTest {
 
     @MockitoBean
     private EntityManager entityManager;
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public MeterRegistry meterRegistry() {
+            return new SimpleMeterRegistry();
+        }
+    }
 
     @Test
     public void testGetHealthzSuccess() throws Exception {

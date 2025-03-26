@@ -7,6 +7,21 @@ spring:
     hibernate:
       ddl-auto: create-drop
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    enable:
+      method-timed: true
+    export:
+      statsd:
+        enabled: true
+        host: localhost
+        port: 8125
+        flavor: etsy
+
 aws:
 #  profile: dev
   region: ${AWS_REGION:us-east-1}
@@ -16,3 +31,10 @@ aws:
 server:
   address: 0.0.0.0
   port: 8080
+
+logging:
+  file:
+    name: /opt/csye6225/my-app.log
+  level:
+    root: INFO
+    com.csye6225.webapp: DEBUG

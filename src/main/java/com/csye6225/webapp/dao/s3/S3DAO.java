@@ -7,7 +7,5 @@ public interface S3DAO {
 
     S3MetaData findObjectById(String id);
 
-    S3MetaData findObjectByFileName(String name);
-
-    void deleteObject(S3MetaData object);
+    void deleteObjectById(String id);
 }

@@ -14,7 +14,8 @@ cat <<EOF | sudo tee /etc/systemd/system/springboot.service
 
 [Unit]
 Description=Web Application
-After=network.target
+After=network.target amazon-cloudwatch-agent.service
+Requires=amazon-cloudwatch-agent.service
 
 [Service]
 User=${Owner}

@@ -3,7 +3,7 @@ package com.csye6225.webapp.controller;
 
 import com.csye6225.webapp.exception.*;
 import com.csye6225.webapp.entity.HealthCheck;
-import com.csye6225.webapp.service.HealthCheckService;
+import com.csye6225.webapp.service.health.HealthCheckService;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;

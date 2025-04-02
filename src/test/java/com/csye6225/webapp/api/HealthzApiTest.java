@@ -1,8 +1,8 @@
 package com.csye6225.webapp.api;
 
 import com.csye6225.webapp.controller.HealthCheckController;
-import com.csye6225.webapp.dao.HealthCheckDAO;
-import com.csye6225.webapp.service.HealthCheckService;
+import com.csye6225.webapp.dao.health.HealthCheckDAO;
+import com.csye6225.webapp.service.health.HealthCheckService;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.persistence.EntityManager;

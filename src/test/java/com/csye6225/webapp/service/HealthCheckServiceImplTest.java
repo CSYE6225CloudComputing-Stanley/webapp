@@ -1,7 +1,8 @@
 package com.csye6225.webapp.service;
 
-import com.csye6225.webapp.dao.HealthCheckDAO;
+import com.csye6225.webapp.dao.health.HealthCheckDAO;
 import com.csye6225.webapp.entity.HealthCheck;
+import com.csye6225.webapp.service.health.HealthCheckServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

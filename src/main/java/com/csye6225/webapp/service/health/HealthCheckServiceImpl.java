@@ -1,6 +1,6 @@
-package com.csye6225.webapp.service;
+package com.csye6225.webapp.service.health;
 
-import com.csye6225.webapp.dao.HealthCheckDAO;
+import com.csye6225.webapp.dao.health.HealthCheckDAO;
 
 import com.csye6225.webapp.entity.HealthCheck;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -5,7 +5,7 @@ import com.csye6225.webapp.entity.HealthCheck;
 import com.csye6225.webapp.exception.HttpRequestParameterNotAllowed;
 import com.csye6225.webapp.exception.HttpRequestPathVariableNotAllowed;
 import com.csye6225.webapp.exception.HttpRequestPayloadNotAllowedException;
-import com.csye6225.webapp.service.HealthCheckService;
+import com.csye6225.webapp.service.health.HealthCheckService;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.servlet.http.HttpServletRequest;

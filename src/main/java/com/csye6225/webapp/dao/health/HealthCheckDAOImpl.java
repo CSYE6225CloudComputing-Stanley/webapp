@@ -1,4 +1,4 @@
-package com.csye6225.webapp.dao;
+package com.csye6225.webapp.dao.health;
 
 import com.csye6225.webapp.entity.HealthCheck;
 import io.micrometer.core.instrument.MeterRegistry;

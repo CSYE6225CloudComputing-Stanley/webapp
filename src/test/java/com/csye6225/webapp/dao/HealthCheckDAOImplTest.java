@@ -1,6 +1,6 @@
 package com.csye6225.webapp.dao;
 
-import com.csye6225.webapp.controller.HealthCheckController;
+import com.csye6225.webapp.dao.health.HealthCheckDAOImpl;
 import com.csye6225.webapp.entity.HealthCheck;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;

@@ -1,7 +1,6 @@
 # aws var
 aws_region              = "us-east-1"
 aws_profile             = "packer-dev"
-ami_name                = "my_ubuntu_AMI"
 aws_instance_type       = "t2.medium"
 ami_filter_name         = "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"
 ami_root_device_type    = "ebs"

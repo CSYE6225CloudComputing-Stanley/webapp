@@ -55,6 +55,23 @@ public class HealthCheckController {
         }
     }
 
+    @GetMapping("/cicd/**")
+    public ResponseEntity<Void> test(HttpServletRequest request) {
+        if (!request.getRequestURI().equals("/cicd")) throw new HttpRequestPathVariableNotAllowed();
+
+        if (request.getContentLength() > 0) throw new HttpRequestPayloadNotAllowedException();
+
+        if (request.getQueryString() != null) throw new HttpRequestParameterNotAllowed();
+
+        HealthCheck healthCheck = healthCheckService.initHealthCheck();
+        healthCheckService.save(healthCheck);
+
+        return ResponseEntity
+                .ok()
+                .header("Cache-Control", "no-cache")
+                .build();
+    }
+
     @RequestMapping(value = "/healthz", method = {RequestMethod.OPTIONS, RequestMethod.HEAD})
     public void handleOptionsAndHeadRequest() {
         throw new HttpRequestOptionsAndHeadNotAllowed();

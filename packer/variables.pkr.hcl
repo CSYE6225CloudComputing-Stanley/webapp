@@ -8,10 +8,6 @@ variable "aws_profile" {
   default = "dev"
 }
 
-variable "ami_name" {
-  type    = string
-  default = "ubuntu-24-04"
-}
 
 variable "aws_instance_type" {
   type    = string

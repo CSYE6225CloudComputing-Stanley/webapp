@@ -12,7 +12,7 @@ packer {
 }
 
 source "amazon-ebs" "ubuntu" {
-  ami_name      = var.ami_name
+  ami_name      = "webapp-{{timestamp}}"
   instance_type = var.aws_instance_type
   region        = var.aws_region
   profile       = var.aws_profile
@@ -29,6 +29,10 @@ source "amazon-ebs" "ubuntu" {
   ssh_username = var.ssh_username
   ami_users    = [var.demo_account_id]
   ami_groups   = []
+
+  tags = {
+    Name = "webapp"
+  }
 }
 
 # source "googlecompute" "ubuntu" {

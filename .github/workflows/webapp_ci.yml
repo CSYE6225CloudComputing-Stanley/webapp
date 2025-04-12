@@ -182,3 +182,79 @@ jobs:
             -var "DB_USERNAME=${DB_USERNAME}" \
             -var "DB_PASSWORD=${DB_PASSWORD}" \
             .
+
+  cd-process:
+    runs-on: ubuntu-latest
+    needs: [packer-build]
+
+    steps:
+      - name: Switch to DEMO AWS Account
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_DEMO_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_DEMO_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Get Latest AMI ID
+        id: get-ami
+        run: |
+          AMI_ID=$(aws ec2 describe-images \
+            --filters "Name=name,Values=webapp-*" \
+            --query "Images | sort_by(@, &CreationDate)[-1].ImageId" \
+            --output text)
+          echo "AMI_ID=$AMI_ID" >> $GITHUB_OUTPUT
+
+      - name: Get Launch Template Name
+        id: get-template
+        run: |
+          TEMPLATE_NAME=$(aws ec2 describe-launch-templates \
+            --query "LaunchTemplates[0].LaunchTemplateName" \
+            --output text)
+          echo "TEMPLATE_NAME=$TEMPLATE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Get Auto Scaling Group Name
+        id: get-asg
+        run: |
+          ASG_NAME=$(aws autoscaling describe-auto-scaling-groups \
+            --query "AutoScalingGroups[0].AutoScalingGroupName" \
+            --output text)
+          echo "ASG_NAME=$ASG_NAME" >> $GITHUB_OUTPUT
+
+      - name: Update Launch Template
+        run: |
+          LATEST_VERSION=$(aws ec2 describe-launch-template-versions \
+            --launch-template-name "${{ steps.get-template.outputs.TEMPLATE_NAME }}" \
+            --query "LaunchTemplateVersions | sort_by(@, &VersionNumber)[-1].VersionNumber" \
+            --output text)
+
+          aws ec2 create-launch-template-version \
+            --launch-template-name "${{ steps.get-template.outputs.TEMPLATE_NAME }}" \
+            --source-version "$LATEST_VERSION" \
+            --version-description "updated from GitHub Actions" \
+            --launch-template-data '{"ImageId":"${{ steps.get-ami.outputs.AMI_ID }}"}'
+
+      - name: Set Launch Template Version for ASG
+        run: |
+          aws autoscaling update-auto-scaling-group \
+            --auto-scaling-group-name "${{ steps.get-asg.outputs.ASG_NAME }}" \
+            --launch-template "LaunchTemplateName=${{ steps.get-template.outputs.TEMPLATE_NAME }},Version=\$Latest"
+
+      - name: Start Instance Refresh
+        id: refresh
+        run: |
+          aws autoscaling start-instance-refresh \
+            --auto-scaling-group-name "${{ steps.get-asg.outputs.ASG_NAME }}" \
+            --strategy Rolling
+
+      - name: Wait for Instance Refresh to Complete
+        run: |
+          while true; do
+            STATUS=$(aws autoscaling describe-instance-refreshes \
+              --auto-scaling-group-name "${{ steps.get-asg.outputs.ASG_NAME }}" \
+              --query "InstanceRefreshes[0].Status" \
+              --output text)
+            echo "Current status: $STATUS"
+            if [ "$STATUS" = "Successful" ]; then exit 0; fi
+            if [ "$STATUS" = "Failed" ]; then exit 1; fi
+            sleep 30
+          done

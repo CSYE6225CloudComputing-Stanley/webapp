@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# echo "Saving environment variables to /etc/environment....."
-# echo "DB_NAME=${DB_NAME}" | sudo tee -a /etc/environment
-# echo "DB_USERNAME=${DB_USERNAME}" | sudo tee -a /etc/environment
-# echo "DB_PASSWORD=${DB_PASSWORD}" | sudo tee -a /etc/environment
 
 echo "Creating empty /etc/environment file..."
 sudo touch /etc/environment

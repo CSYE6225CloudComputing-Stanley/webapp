@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.time.Duration;
 
 
-@RequestMapping("/v2/file")
+@RequestMapping("/v1/file")
 @RestController
 public class S3FileController {
 
